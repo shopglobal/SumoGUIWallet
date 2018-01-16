@@ -8,7 +8,7 @@ from __future__ import print_function
 # -*- coding: utf-8 -*-
 ## Copyright (c) 2017, The Sumokoin Project (www.sumokoin.org)
 '''
-Process managers for sumokoind, sumo-wallet-cli and sumo-wallet-rpc
+Process managers for myntd, mynt-wallet-cli and myntnote-wallet-rpc
 '''
 
 import sys, os
@@ -79,8 +79,8 @@ class ProcessManager(Thread):
 
 class SumokoindManager(ProcessManager):
     def __init__(self, resources_path, log_level=0, block_sync_size=10):
-        proc_args = u'%s/bin/sumokoind --log-level %d --block-sync-size %d' % (resources_path, log_level, block_sync_size)
-        ProcessManager.__init__(self, proc_args, "sumokoind")
+        proc_args = u'%s/bin/myntd --log-level %d --block-sync-size %d' % (resources_path, log_level, block_sync_size)
+        ProcessManager.__init__(self, proc_args, "myntd")
         self.synced = Event()
         self.stopped = Event()
         
@@ -103,16 +103,16 @@ class SumokoindManager(ProcessManager):
         self.stopped.set()
 
 class WalletCliManager(ProcessManager):
-    fail_to_connect_str = "wallet failed to connect to daemon"
+    fail_to_connect_str = "wallet failed to connect to Mynt daemon"
     
     def __init__(self, resources_path, wallet_file_path, wallet_log_path, restore_wallet=False):
         if not restore_wallet:
-            wallet_args = u'%s/bin/sumo-wallet-cli --generate-new-wallet=%s --log-file=%s' \
+            wallet_args = u'%s/bin/mynt-wallet-cli --generate-new-wallet=%s --log-file=%s' \
                                                 % (resources_path, wallet_file_path, wallet_log_path)
         else:
-            wallet_args = u'%s/bin/sumo-wallet-cli --log-file=%s --daemon-port 19735 --restore-deterministic-wallet' \
+            wallet_args = u'%s/bin/mynt-wallet-cli --log-file=%s --daemon-port 24091 --restore-deterministic-wallet' \
                                                 % (resources_path, wallet_log_path)
-        ProcessManager.__init__(self, wallet_args, "sumo-wallet-cli")
+        ProcessManager.__init__(self, wallet_args, "mynt-wallet-cli")
         self.ready = Event()
         self.last_error = ""
         
@@ -147,11 +147,11 @@ class WalletCliManager(ProcessManager):
 class WalletRPCManager(ProcessManager):
     def __init__(self, resources_path, wallet_file_path, wallet_password, app, log_level=2):
         self.user_agent = str(uuid4().hex)
-        wallet_log_path = os.path.join(os.path.dirname(wallet_file_path), "sumo-wallet-rpc.log")
-        wallet_rpc_args = u'%s/bin/sumo-wallet-rpc --wallet-file %s --log-file %s --rpc-bind-port 19736 --user-agent %s --log-level %d' \
+        wallet_log_path = os.path.join(os.path.dirname(wallet_file_path), "mynt-wallet-rpc.log")
+        wallet_rpc_args = u'%s/bin/mynt-wallet-rpc --wallet-file %s --log-file %s --rpc-bind-port 3000 --user-agent %s --log-level %d' \
                                             % (resources_path, wallet_file_path, wallet_log_path, self.user_agent, log_level)
                                                                                 
-        ProcessManager.__init__(self, wallet_rpc_args, "sumo-wallet-rpc")
+        ProcessManager.__init__(self, wallet_rpc_args, "mynt-wallet-rpc")
         sleep(0.2)
         self.send_command(wallet_password)
         
